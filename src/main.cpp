@@ -306,7 +306,49 @@ void UploadData2Xampp(int id) {
   delay(1000); // Delay between uploads
 }
 
+//++ Function for check WiFi Still Connected if not Reconnect it
+void checkWiFiConnection() {
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("WiFi disconnected. Attempting reconnection...");
 
+    // Re-initialize WiFi in both STA and AP mode
+    WiFi.mode(WIFI_STA);
+    WiFi.STA.begin();
+    Serial.print("Server MAC Address: ");
+    readMacAddress();
+
+    Serial.println("Start connect wifi");
+    delay(2000);
+    
+    WiFi.mode(WIFI_AP_STA); // Set device as Station + SoftAP
+    WiFi.begin(ssid, password); // Connect to router
+
+    unsigned long startAttemptTime = millis();
+    const unsigned long timeout = 15000; // 15 seconds timeout
+
+    while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < timeout) {
+      delay(1000);
+      Serial.println("Setting as a Wi-Fi Station..");
+    }
+
+    if (WiFi.status() == WL_CONNECTED) {
+      Serial.println("Reconnected to Wi-Fi!");
+      Serial.print("Server SOFT AP MAC Address:  ");
+      Serial.println(WiFi.softAPmacAddress());
+
+      chan = WiFi.channel();
+      Serial.print("Station IP Address: ");
+      Serial.println(WiFi.localIP());
+      Serial.print("Wi-Fi Channel: ");
+      Serial.println(WiFi.channel());
+    } else {
+      Serial.println("Failed to reconnect to Wi-Fi.");
+    }
+  }
+}
+
+
+//-- Function for check WiFi Still Connected if not Reconnect it
 void setup() {
   // Initialize Serial Monitor
   Serial.begin(115200);
@@ -359,6 +401,9 @@ void setup() {
 }
 
 void loop() {
+// check wifi connect
+checkWiFiConnection();
+
   static unsigned long lastEventTime = millis();
   static const unsigned long EVENT_INTERVAL_MS = 5000;
   if ((millis() - lastEventTime) > EVENT_INTERVAL_MS) {
