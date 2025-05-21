@@ -344,6 +344,11 @@ void checkWiFiConnection() {
     } else {
       Serial.println("Failed to reconnect to Wi-Fi.");
     }
+
+    esp_now_deinit();  // Fully disable ESP-NOW
+    delay(1000);
+    initESP_NOW();
+
   }
 }
 
@@ -401,8 +406,6 @@ void setup() {
 }
 
 void loop() {
-// check wifi connect
-checkWiFiConnection();
 
   static unsigned long lastEventTime = millis();
   static const unsigned long EVENT_INTERVAL_MS = 5000;
@@ -412,6 +415,10 @@ checkWiFiConnection();
     readDataToSend();
     esp_now_send(NULL, (uint8_t *) &outgoingSetpoints, sizeof(outgoingSetpoints));
   };
+
+// check wifi connect
+  checkWiFiConnection();  // for check wifi connect before upload data to mysql server
+
 // ++ upload data to xampp
   for (int i = 0; i < 5; i++) {
     if (readytoupload[i] && temperatures[i] > 0 && humidities[i] > 0) {
