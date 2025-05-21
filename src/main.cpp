@@ -30,7 +30,7 @@ JSONVar boards[5];
 esp_now_peer_info_t slave;
 int chan; 
 
-enum MessageType {PAIRING, DATA,};
+enum MessageType {PAIRING, DATA, RESET};  //++ Add RESET to enum for Send Reset Command
 MessageType messageType;
 
 int counter = 0;
@@ -149,6 +149,14 @@ void readDataToSend() {
   outgoingSetpoints.id = 0;
   outgoingSetpoints.temp = 999;   //random(0, 40);
   outgoingSetpoints.hum = 888;    //random(0, 100);
+  outgoingSetpoints.readingId = counter++;
+}
+
+void readDataToSendResetPeer() {
+  outgoingSetpoints.msgType = RESET;
+  outgoingSetpoints.id = 0;
+  outgoingSetpoints.temp = 111;   //random(0, 40);
+  outgoingSetpoints.hum = 222;    //random(0, 100);
   outgoingSetpoints.readingId = counter++;
 }
 
@@ -310,40 +318,43 @@ void UploadData2Xampp(int id) {
 void checkWiFiConnection() {
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("WiFi disconnected. Attempting reconnection...");
+    for (int i=0 ; i<10 ; i++) {
+      Serial.println("Prepare to Restart!!"+i);
+    }
+    ESP.restart();
+    // // Re-initialize WiFi in both STA and AP mode
+    // WiFi.mode(WIFI_STA);
+    // WiFi.STA.begin();
+    // Serial.print("Server MAC Address: ");
+    // readMacAddress();
 
-    // Re-initialize WiFi in both STA and AP mode
-    WiFi.mode(WIFI_STA);
-    WiFi.STA.begin();
-    Serial.print("Server MAC Address: ");
-    readMacAddress();
-
-    Serial.println("Start connect wifi");
-    delay(2000);
+    // Serial.println("Start connect wifi");
+    // delay(2000);
     
-    WiFi.mode(WIFI_AP_STA); // Set device as Station + SoftAP
-    WiFi.begin(ssid, password); // Connect to router
+    // WiFi.mode(WIFI_AP_STA); // Set device as Station + SoftAP
+    // WiFi.begin(ssid, password); // Connect to router
 
-    unsigned long startAttemptTime = millis();
-    const unsigned long timeout = 15000; // 15 seconds timeout
+    // unsigned long startAttemptTime = millis();
+    // const unsigned long timeout = 15000; // 15 seconds timeout
 
-    while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < timeout) {
-      delay(1000);
-      Serial.println("Setting as a Wi-Fi Station..");
-    }
+    // while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < timeout) {
+    //   delay(1000);
+    //   Serial.println("Setting as a Wi-Fi Station..");
+    // }
 
-    if (WiFi.status() == WL_CONNECTED) {
-      Serial.println("Reconnected to Wi-Fi!");
-      Serial.print("Server SOFT AP MAC Address:  ");
-      Serial.println(WiFi.softAPmacAddress());
+    // if (WiFi.status() == WL_CONNECTED) {
+    //   Serial.println("Reconnected to Wi-Fi!");
+    //   Serial.print("Server SOFT AP MAC Address:  ");
+    //   Serial.println(WiFi.softAPmacAddress());
 
-      chan = WiFi.channel();
-      Serial.print("Station IP Address: ");
-      Serial.println(WiFi.localIP());
-      Serial.print("Wi-Fi Channel: ");
-      Serial.println(WiFi.channel());
-    } else {
-      Serial.println("Failed to reconnect to Wi-Fi.");
-    }
+    //   chan = WiFi.channel();
+    //   Serial.print("Station IP Address: ");
+    //   Serial.println(WiFi.localIP());
+    //   Serial.print("Wi-Fi Channel: ");
+    //   Serial.println(WiFi.channel());
+    // } else {
+    //   Serial.println("Failed to reconnect to Wi-Fi.");
+    // }
   }
 }
 
