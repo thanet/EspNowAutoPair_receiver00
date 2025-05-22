@@ -14,8 +14,10 @@
 #include <Arduino_JSON.h>
 
 #include <HTTPClient.h>   // for upload data to webserver (xampp)
-
-// Replace with your network credentials (STATION)
+// // Replace with EnjoyKM0 network credentials (STATION)
+// const char* ssid = "TrueEnjoy";
+// const char* password = "enjoy7777777777";
+// Replace with TheHouse network credentials (STATION)
 const char* ssid = "ENJMesh";
 const char* password = "enjoy042611749";
 // Xampp server http link
