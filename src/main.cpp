@@ -56,6 +56,7 @@ typedef struct struct_pairing {       // new structure for pairing
 
 struct_message incomingReadings;
 struct_message outgoingSetpoints;
+struct_message outgoingResetPeers;    // new struct_message for Reset All Peers
 struct_pairing pairingData;
 
 AsyncWebServer server(80);
@@ -153,11 +154,11 @@ void readDataToSend() {
 }
 
 void readDataToSendResetPeer() {
-  outgoingSetpoints.msgType = RESET;
-  outgoingSetpoints.id = 0;
-  outgoingSetpoints.temp = 111;   //random(0, 40);
-  outgoingSetpoints.hum = 222;    //random(0, 100);
-  outgoingSetpoints.readingId = counter++;
+  outgoingResetPeers.msgType = RESET;
+  outgoingResetPeers.id = 0;
+  outgoingResetPeers.temp = 111;   //random(0, 40);
+  outgoingResetPeers.hum = 222;    //random(0, 100);
+  outgoingResetPeers.readingId = counter++;
 }
 
 // ---------------------------- esp_ now -------------------------
@@ -321,40 +322,10 @@ void checkWiFiConnection() {
     for (int i=0 ; i<10 ; i++) {
       Serial.println("Prepare to Restart!!"+i);
     }
+    readDataToSendResetPeer();
+    esp_now_send(NULL, (uint8_t *) &outgoingResetPeers, sizeof(outgoingResetPeers));
     ESP.restart();
-    // // Re-initialize WiFi in both STA and AP mode
-    // WiFi.mode(WIFI_STA);
-    // WiFi.STA.begin();
-    // Serial.print("Server MAC Address: ");
-    // readMacAddress();
-
-    // Serial.println("Start connect wifi");
-    // delay(2000);
     
-    // WiFi.mode(WIFI_AP_STA); // Set device as Station + SoftAP
-    // WiFi.begin(ssid, password); // Connect to router
-
-    // unsigned long startAttemptTime = millis();
-    // const unsigned long timeout = 15000; // 15 seconds timeout
-
-    // while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < timeout) {
-    //   delay(1000);
-    //   Serial.println("Setting as a Wi-Fi Station..");
-    // }
-
-    // if (WiFi.status() == WL_CONNECTED) {
-    //   Serial.println("Reconnected to Wi-Fi!");
-    //   Serial.print("Server SOFT AP MAC Address:  ");
-    //   Serial.println(WiFi.softAPmacAddress());
-
-    //   chan = WiFi.channel();
-    //   Serial.print("Station IP Address: ");
-    //   Serial.println(WiFi.localIP());
-    //   Serial.print("Wi-Fi Channel: ");
-    //   Serial.println(WiFi.channel());
-    // } else {
-    //   Serial.println("Failed to reconnect to Wi-Fi.");
-    // }
   }
 }
 
